@@ -1,7 +1,7 @@
 {
   "name": "@hoajs/language",
   "version": "0.1.0",
-  "description": "Language middleware for Hoa.",
+  "description": "Language detector middleware for Hoa.",
   "main": "./dist/cjs/index.js",
   "type": "module",
   "module": "./dist/esm/index.js",
@@ -40,22 +40,22 @@
   "devDependencies": {
     "@commitlint/cli": "20.1.0",
     "@commitlint/config-conventional": "20.0.0",
+    "@hoajs/cookie": "0.1.1",
     "@hoajs/tiny-router": "0.1.0",
     "@jest/globals": "30.2.0",
     "@types/jest": "30.0.0",
-    "eslint": "9.37.0",
+    "eslint": "9.39.1",
     "hoa": "*",
     "husky": "9.1.7",
     "jest": "30.2.0",
     "neostandard": "0.12.2",
     "ts-jest": "29.4.5",
     "ts-node": "10.9.2",
-    "tsup": "8.5.0",
+    "tsup": "8.5.1",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
-    "hoa": "*",
-    "@hoajs/cookie": "*"
+    "hoa": "*"
   },
   "engines": {
     "node": ">=20"

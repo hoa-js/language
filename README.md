@@ -1,6 +1,6 @@
 ## @hoajs/language
 
-Language middleware for Hoa.
+Language detector middleware for Hoa.
 
 ## Installation
 
@@ -12,14 +12,12 @@ $ npm i @hoajs/language --save
 
 ```js
 import { Hoa } from 'hoa'
-import { every, some } from '@hoajs/language'
+import { cookie } from '@hoajs/cookie'
+import { language } from '@hoajs/language'
 
 const app = new Hoa()
-
-app.use(
-  language(
-  )
-)
+app.extend(cookie())
+app.use(language())
 
 export default app
 ```

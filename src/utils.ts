@@ -43,7 +43,7 @@ const sortByQualityAndIndex = (a: Accept & { index: number }, b: Accept & { inde
 const parseParams = (paramParts: string[]): Record<string, string> => {
   return paramParts.reduce<Record<string, string>>((acc, param) => {
     const [key, val] = param.split('=').map((s) => s.trim())
-    if (key && val) {
+    if (key && val !== undefined) {
       acc[key] = val
     }
     return acc
@@ -66,7 +66,7 @@ const parseAcceptValue = ({ value, index }: { value: string; index: number }) =>
   return { type, params, q, index }
 }
 
-export const parseAccept = (acceptHeader: string): Accept[] => {
+export const parseAccept = (acceptHeader: string | null | undefined): Accept[] => {
   if (!acceptHeader) {
     return []
   }

@@ -20,6 +20,13 @@ describe('Language middleware', () => {
   })
 })
 
+describe('default options', () => {
+  it('should allow calling language without options', () => {
+    const mw = language()
+    expect(typeof mw).toBe('function')
+  })
+})
+
 describe('Language middleware', () => {
   let app: Hoa
 
@@ -557,19 +564,121 @@ describe('Language middleware', () => {
     })
 
     it('should log debug errors when detectors fail', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation((message) => { })
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
 
-      app.get('/debug-error', language({
+      const middleware = language({
         supportedLanguages: ['en', 'fr', 'es'],
         fallbackLanguage: 'en',
-        debug: true
-      }), (ctx) => {
-        ctx.res.body = ctx.language
+        debug: true,
+        order: ['header']
       })
 
-      await app.fetch(new Request('http://localhost/debug-error/'))
+      const ctx = {
+        req: {
+          query: {},
+          get: () => {
+            throw new Error('Detector failed')
+          },
+          getCookie: async () => undefined,
+          pathname: '/'
+        },
+        res: {
+          setCookie: async () => { }
+        },
+        throw: jest.fn()
+      } as any
 
+      await middleware(ctx, async () => { })
+
+      expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
+    })
+
+    it('should handle detector errors when debug is disabled', async () => {
+      const middleware = language({
+        supportedLanguages: ['en', 'fr', 'es'],
+        fallbackLanguage: 'en',
+        debug: false,
+        order: ['header']
+      })
+
+      const ctx = {
+        req: {
+          query: {},
+          get: () => {
+            throw new Error('Detector failed')
+          },
+          getCookie: async () => undefined,
+          pathname: '/'
+        },
+        res: {
+          setCookie: async () => { }
+        },
+        throw: jest.fn()
+      } as any
+
+      await middleware(ctx, async () => { })
+
+      expect(ctx.language).toBe('en')
+    })
+
+    it('should log cache errors when debug mode is enabled', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { })
+
+      const middleware = language({
+        supportedLanguages: ['en', 'fr', 'es'],
+        fallbackLanguage: 'en',
+        order: ['querystring'],
+        caches: ['cookie'],
+        debug: true
+      })
+
+      const ctx = {
+        req: {
+          query: { lang: 'fr' },
+          getCookie: async () => undefined,
+          pathname: '/'
+        },
+        res: {
+          setCookie: async () => {
+            throw new Error('Cache failed')
+          }
+        },
+        throw: jest.fn()
+      } as any
+
+      await middleware(ctx, async () => { })
+
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should handle cache errors when debug is disabled', async () => {
+      const middleware = language({
+        supportedLanguages: ['en', 'fr', 'es'],
+        fallbackLanguage: 'en',
+        order: ['querystring'],
+        caches: ['cookie'],
+        debug: false
+      })
+
+      const ctx = {
+        req: {
+          query: { lang: 'fr' },
+          getCookie: async () => undefined,
+          pathname: '/'
+        },
+        res: {
+          setCookie: async () => {
+            throw new Error('Cache failed')
+          }
+        },
+        throw: jest.fn()
+      } as any
+
+      await middleware(ctx, async () => { })
+
+      expect(ctx.language).toBe('fr')
     })
   })
 
@@ -609,6 +718,17 @@ describe('Language middleware', () => {
 
       const result = detectors.path(mockCtx, mockOptions)
       expect(result).toBe('es')
+    })
+
+    it('detectFromCookie should return undefined when cookie lookup returns false', async () => {
+      const mockCtx = {
+        req: {
+          getCookie: async () => false
+        }
+      } as any
+
+      const result = await detectors.cookie(mockCtx, mockOptions)
+      expect(result).toBeUndefined()
     })
   })
 

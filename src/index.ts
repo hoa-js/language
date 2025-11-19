@@ -1,9 +1,17 @@
 import type { HoaContext, HoaMiddleware } from 'hoa'
 import { parseAccept } from './utils.ts'
 
-declare module 'Hoa' {
+declare module 'hoa' {
   interface HoaContext {
     language: string
+  }
+
+  interface HoaRequest {
+    getCookie(name: string): Promise<string | undefined | false>
+  }
+
+  interface HoaResponse {
+    setCookie(name: string, value: string): Promise<void>
   }
 }
 
@@ -51,11 +59,11 @@ export const DEFAULT_OPTIONS: DetectorOptions = {
 }
 
 /**
- * Language Middleware for Hoa.
+ * Language detector middleware for Hoa.
  * @param {DetectorOptions} [userOptions] - The options to use.
  * @returns {HoaMiddleware} The middleware handler function
  */
-export const language = (userOptions: Partial<DetectorOptions>): HoaMiddleware => {
+export const language = (userOptions: Partial<DetectorOptions> = {}): HoaMiddleware => {
   const options: DetectorOptions = {
     ...DEFAULT_OPTIONS,
     ...userOptions,
@@ -87,6 +95,9 @@ export const detectFromQuery = (ctx: HoaContext, options: DetectorOptions): stri
  */
 export const detectFromCookie = async (ctx: HoaContext, options: DetectorOptions): Promise<string | undefined> => {
   const cookie = await ctx.req.getCookie(options.lookupCookie)
+  if (cookie === false) {
+    return undefined
+  }
   return normalizeLanguage(cookie, options)
 }
 
@@ -220,7 +231,7 @@ function validateOptions (options: DetectorOptions): void {
 }
 
 function validateCookiePlugin (ctx: HoaContext): void {
-  if (!ctx.req.getCookie) {
-    ctx.throw(500, 'Cookie plugin is required')
+  if (!ctx.req.getCookie || !ctx.res.setCookie) {
+    ctx.throw(500, 'Cookie plugin (eg: @hoajs/cookie) is required')
   }
 }

@@ -32,6 +32,13 @@ describe('parseAccept Comprehensive Tests', () => {
       expect(result.every((x) => x.q >= 0 && x.q <= 1)).toBe(true)
     })
 
+    it('treats empty q value as default quality', () => {
+      const header = 'type;q='
+      const result = parseAccept(header)
+      expect(result[0].params.q).toBe('')
+      expect(result[0].q).toBe(1)
+    })
+
     it('preserves original q string in params', () => {
       const header = 'type;q=invalid'
       const result = parseAccept(header)
@@ -58,7 +65,8 @@ describe('parseAccept Comprehensive Tests', () => {
       const header = 'type;=value;;key=;=;====;key====value'
       const result = parseAccept(header)
       expect(result[0].type).toBe('type')
-      expect(Object.keys(result[0].params).length).toBe(0)
+      expect(Object.keys(result[0].params).length).toBe(1)
+      expect(result[0].params.key).toBe('')
     })
 
     it('handles duplicate parameters', () => {
