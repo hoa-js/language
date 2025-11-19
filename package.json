@@ -55,7 +55,8 @@
     "typescript": "5.9.3"
   },
   "peerDependencies": {
-    "hoa": "*"
+    "hoa": "*",
+    "@hoajs/cookie": "*"
   },
   "engines": {
     "node": ">=20"

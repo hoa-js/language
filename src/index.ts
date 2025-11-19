@@ -5,14 +5,6 @@ declare module 'hoa' {
   interface HoaContext {
     language: string
   }
-
-  interface HoaRequest {
-    getCookie(name: string): Promise<string | undefined | false>
-  }
-
-  interface HoaResponse {
-    setCookie(name: string, value: string): Promise<void>
-  }
 }
 
 export type DetectorType = 'path' | 'querystring' | 'cookie' | 'header'
